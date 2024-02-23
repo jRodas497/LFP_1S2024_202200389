@@ -1,0 +1,2 @@
+# LFP_1S2024_202200389
+Practica 1 LFP 1S
