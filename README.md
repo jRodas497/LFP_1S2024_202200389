@@ -1,2 +1,4 @@
-# LFP_1S2024_202200389
-Practica 1 LFP 1S
+# *LFP_Práctica1_202200389*
+
+* *Juan José Rodas Mansilla*
+* *202200389*
