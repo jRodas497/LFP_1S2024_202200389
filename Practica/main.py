@@ -20,8 +20,8 @@ def menu():
     print("| 2. DATOS DEL ALUMNO                                 |")
     print("| 2. CARGAR ALUMNOS                                   |")
     print("| 4. AGREGAR CALIFICACIONES                           |")
-    print("| 5. REPORTE DE ALUMNOS                               |")
-    print("| 6. REPORTE DE APROBADOS                             |")
+    print("| 5. REPORTE ALUMNOS                                  |")
+    print("| 6. REPORTE APROBADOS                                |")
     print("| 7. TOP 3 ALUMNOS                                    |")
     print("-------------------------------------------------------")
     
@@ -34,6 +34,7 @@ def menu():
         print('+++  Adios, esperamos volver a verte :)  +++')
     elif opcion == '2':
         data()
+        
     elif opcion == '3':
         menu()
     elif opcion == '4':
@@ -54,7 +55,7 @@ def data():
     print("-------------------------------------------------------")
     print("-> JUAN JOSÉ RODAS MANSILLA                           |")
     print("-> 202200389                                          |")
-    print("LFP Sección A-                                        |")
+    print("->LFP Sección A-                                      |")
     print("-> Ingenieria en Ciencias y Sistemas                  |")
     
     menu()

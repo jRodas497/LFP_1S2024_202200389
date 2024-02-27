@@ -20,4 +20,35 @@ class School:
                     if student.id == id:
                         student.add_ratings(ratings)
                         
-    
+    def top3(self):
+        sort = sorted(self.students, key = lambda x: x.calc_prom(), reverse=True)[:3]
+        with open('top3.html', 'w') as file:
+            file.write('<html><head><style>')
+            
+            file.write('p { margin-bottom: 15px }')
+            file.write('</style></head><body><h1>Estudiantes con mejor promdeio</h1>')
+            for est in sort:
+                
+                file.write(f'<p><strong>Carnet:</strong> {est.id}</p>')
+                file.write(f'<p><strong>Nombre:</strong> {est.name}</p>')
+                file.write(f'<p><strong>Promedio:</strong> {est.calc_prom()}</p><br>')
+                
+            file.write('</body></html>')
+        print('Listado hecho!')
+        
+    def report(self):
+        with open('reporte.html', 'w') as file:
+            file.write('<html><head><style>')
+            file.write(' h1 { color:navy; }')
+            file.write('p { margin-bottom: 15px }')
+            file.write('</style></head><body><h1>Reporte de Estudiantes</h1>')
+            
+            for est in self.students:
+                file.write(f'<p><strong>Carnet: </strong> {est.id}</p>')
+                file.write(f'<p><strong>Nombre: </strong> {est.name}</p>')
+                file.write(f'<p><strong>Carnet: </strong> {est.id}</p>')
+                file.write('<p><strong>Calificaciones: </p>')
+                file.write(', '.join(map(str, est.rating)))
+                file.write('</p><br>')
+            file.write('</body></html>')
+        print('Listado hecho!')
