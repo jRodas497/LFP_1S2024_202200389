@@ -6,10 +6,6 @@ class Expression(ABC):
         self.columna = columna
 
     @abstractmethod
-    def operar(self, arbol):
-        pass
-
-    @abstractmethod
     def obtener_Fila(self):
         return self.fila
 

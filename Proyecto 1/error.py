@@ -1,10 +1,7 @@
 class Error():
-    def __init__(self, lexema, errorChar, type, line, column):
+    def __init__(self, lexema, palabra, type, fila, columna):
         self.lexema = lexema
-        self.errorChar = errorChar
+        self.palabra = palabra
         self.type = type
-        self.line = line
-        self.column = column
-
-    def __str__(self):
-        return f"Error({self.lexema}, {self.errorChar}, {self.type}, {self.line}, {self.column})"
+        self.fila = fila
+        self.columna = columna
