@@ -1,0 +1,80 @@
+Inicio: {
+    Encabezado:{
+        TituloPagina: "Calificación LFP";
+    } - ,
+
+    Cuerpo:[
+
+        Fondo: {
+            color: "#8afaa6"; *
+        },
+
+        Titulo:{
+            tamaño: "t1";
+            color: "azul";
+            posicion: "centro";
+            texto: ? "Bienvenido a mi página web";
+        },
+
+        Texto: {
+            fuente = "Courier";
+            texto = "Hoy me siento con suerte!"
+            tamaño ="25";
+            color / = "rojo";
+        },
+
+        Parrafo:{
+            texto: "Estoy escribiendo este párrafo porque quiero contar una historia, de la cual no quiero acordarme";
+            posicion: "derecha";
+        }, 
+        
+        Codigo:{
+            posicion:"centro";
+            texto: "int myNumber = 100 * 100 / 100;.";
+        },
+
+        Salto:{
+            cantidad:"3";
+        },
+
+        Subrayado:{
+            texto: "Subrayo esto porque es importante.";
+        },
+
+        Cursiva:{
+            texto: "Esto está en cursiva porque no sé escribir en carta.";
+        },
+
+        Tachado:{
+            texto: "Tacho esto porque ya no me sirve.";
+        },
+
+        Texto: {
+            fuente = "Brush Script MT";
+            texto = "Prueba de duplicación."
+            tamaño ="15";
+            color = "amarillo";
+        },
+
+        Salto:{
+            cantidad:"10";
+        },
+
+        Negrita:{
+            texto: "Ahora veamos la tabla.";
+        },
+
+        Tabla: {
+            filas: "3";
+            columnas: "3";
+            elemento: {"fila":"1","columna":"1","LFP 1"};
+            elemento: {"fila":"2","columna":"1","LFP 2"};
+            elemento: {"fila":"3","columna":"1","LFP 3"};
+            elemento: {"fila":"3","columna":"2","LFP 4"};
+            elemento: {"fila":"3","columna":"3","LFP 5"};
+
+            elemento: {"fila":"2","columna":"2","Centro"};
+        }
+        
+    ]
+# }

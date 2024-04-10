@@ -1,3 +1,4 @@
+import re
 import json
 import os
 from lexema import Lexema
@@ -5,79 +6,132 @@ from error import Error
 
 class analizador:
     def __init__(self):
-
-        self.numero_linea = 1
-        self.numero_columna = 1
-
-        self.lista_lexema = []
-        self.lista_instrucciones = []
-        self.lista_errores = []
-        
-        self.palabras_reservadas = {
-            'Inicio':'Inicio documento',
-            'Encabezado':'Encabezado documento',
-            'Cuerpo':'Cuerpo documento',
-            'TituloPagina':'Titulo de Encabezado',
-            'Titulo':'Titulo Cuerpo',
-            'texto':'Texto',
-            'posicion':'Posición',
-            'tamaño':'Tamaño del texto',
-            'color':'Color del texto',
-            'Fondo':'Color del fondo',
-            'Parrafo':'Parrafo del Cuerpo',
-            'POSICION':'posicion',
-            'fuente':'Fuente del texto',
-            'Texto':'Texto del Cuerpo',
-            'Codigo':'Fuente de código de ordenador',
-            'Negrita':'Texto en Negrita',
-            'Subrayado':'Texto Subrayado',
-            'Tachado':'Texto Tachado',
-            'Cursiva':'Texto en Cursiva',
-            'Salto':'Salto de linea <p></p>',
-            'cantidad':'Cantidad de Saltos de linea',
-            'Tabla':'Tabla con formato',
-            'elemento':'Contenido de la tabla y posición de F y C'
-        }
-        
-        self.lexemas = list(self.palabras_reservadas.values())
-        
-    def simbolosValidos(self, char):
-        return char in [":", "{", "}", ";", ",", "[", "]"]
+        self.reservadas = [
+            'Inicio', 
+            'Encabezado', 
+            'Cuerpo', 
+            'Titulo', 
+            'Fondo', 
+            'Parrafo', 
+            'Texto', 
+            'Codigo', 
+            'Negrita','Subrayado', 
+            'Tachado', 
+            'Cursiva', 
+            'Salto', 
+            'Tabla', 
+            'elemento', 
+            'filas', 
+            'columnas', 
+            'elemento','TituloPagina', 
+            'texto', 
+            'posicion', 
+            'tamaño', 
+            'color', 
+            'fuente', 
+            'cantidad'
+        ]
     
     def instruccion0(self, cadena):
-        print(cadena)
-        lexema = ''
-        puntero = 0
-        while cadena:
-            char = cadena[puntero]
-            puntero += 1
-            
-            lexema += char
-            print(lexema)
-            if char == ':':
-                print(lexema)
-                puntero += 1
-                if cadena[puntero] == '{':
-                    self.instruccion1(cadena)
-                    lexema, cadena = self.grupo_lexema(cadena[puntero:])
-                    if lexema and cadena:
-                        lexema[:-1]
-                        if lexema not in self.lexemas:
-                            e = Error((len(self.lista_errores)+1),lexema, "Error lexico", self.numero_linea, self.numero_columna)
-                            self.lista_errores.append(e)
-                            self.numero_columna += len(lexema) +1
-                            puntero = 0
-                        else:
-                            lex = Lexema(lexema, self.numero_linea, self.numero_columna)
-                            if lex:
-                                self.lista_lexema.append(lex)
-                                self.numero_columna += len(lexema) + 1
-                                puntero = 0
+        estado0 = 0
+        TOKEN = 1
+        NUM = 2
+        CAD = 3
+        
+        tokensLexemas = []
+        noPermitidos = []
+        textos = ''
+        lexActual = ''
+        estadoActual = estado0
+        posActual = 0
+        linea = 1
+        columna = 1
+        
+        while posActual < len(cadena):
+            char = cadena[posActual]
+        
+            if char == '\n':
+                linea += 1
+                columna = 0
+            else:
+                columna += 1
+            if estadoActual == estado0:
+                if char.isspace():
+                    pass
+                elif char == '{':
+                    tokensLexemas.append(('Llave de apertura', char, linea, columna))
+                elif char == '}':
+                    tokensLexemas.append(('Llave de cerrar', char, linea, columna))
+                elif char == ':':
+                    tokensLexemas.append(('Dos puntos', char, linea, columna))
+                elif char == ';':
+                    tokensLexemas.append(('Punto y coma', char, linea, columna))
+                elif char == ',':
+                    tokensLexemas.append(('Coma', char, linea, columna))
+                elif char == '[':
+                    tokensLexemas.append(('Corchete de apertura', char, linea, columna))
+                elif char == ']':
+                    tokensLexemas.append(('Llave de cerrar', char, linea, columna))
+                elif char == '=':
+                    tokensLexemas.append(('Signo igual', char, linea, columna))
+                elif char == '"':
+                    lexActual += char
+                    estadoActual = CAD
+                elif char.isalpha():
+                    lexActual += char
+                    estadoActual = TOKEN
+                elif char.isdigit():
+                    lexActual += char
+                    estadoActual = NUM
+                else:
+                    noPermitidos.append((char, linea, columna))
+            elif estadoActual == TOKEN:
+                if char.isalpha() or char.isdigit() or char == '_':
+                    lexActual += char
+                else:
+                    if lexActual in self.reservadas:
+                        tokensLexemas.append(('Palabra reservada', lexActual, linea, columna))
+                    else:
+                        noPermitidos.append((lexActual, linea, columna))
+                    lexActual = ''
+                    estadoActual = estado0
+                    continue
+            elif estadoActual == NUM:
+                if char.isdigit():
+                    lexActual += char
+                else:
+                    tokensLexemas.append(('Numero', lexActual, linea, columna))
+                    lexActual = ''
+                    estadoActual = estado0
+                    continue
+            elif estadoActual == CAD:
+                if char == '"':
+                    lexActual += char
+                    lexActual = lexActual.replace('"', '')
                     
+                    tokensLexemas.append(('Cadena', lexActual, linea, columna))            
+                    
+                    a = re.sub(r'[^\w\s]', '', lexActual)
+                    b = re.sub(r'\d+', '', a)
+                    c = re.sub(r'[\d\n]+', '', b)
+                    
+                    textos += c + '\n'
+
+                    lexActual = ''
+                    estadoActual = estado0
+                else:
+                    lexActual += char
+                    
+            posActual += 1
+        return tokensLexemas, noPermitidos, textos
+                
+    def validar_cadena(self, cadena):
+        patron = r'^[a-zA-Z]+$'
+        return bool(re.match(patron, cadena))
+            
     def instruccion1(self, cadena):
         print('Instruccion 1')
-    
-            
+              
     def grupo_lexema(self, cadena):
         lexema = ''
         puntero = ''
@@ -110,17 +164,3 @@ class analizador:
                 json.dump(datos, file, indent = 4)
         except Exception as e:
             print(e)
-            
-    def limpiar_listas(self):
-        self.lista_lexema.clear()
-        self.lista_instrucciones.clear()
-        self.lista_errores.clear()
-
-
-        self.numero_linea = 1
-        self.numero_columna = 1
-        # CONFIGURACIONES
-        self.fondo = ''
-        self.texto = ''
-        self.fuente = ''
-        self.forma = ''
