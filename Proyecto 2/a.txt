@@ -4,13 +4,8 @@
 	ER: "abc"*(8|20)?1;
 	CADENAS: "abc201","81","abcabcabc81";
 },
-	'''
-		Comentario
-		multilinea sadasdasd
-	'''
 {
 	ID: 2;
 	ER: ("resultado:"(4.5|3.1416))|"nulo";
 	CADENAS: "resultado:4.5","resultado:3.1416","nulo";
 }
-

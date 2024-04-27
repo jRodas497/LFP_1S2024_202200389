@@ -3,6 +3,7 @@ import tkinter as tk
 import tkinter.font as font
 from tkinter import ttk, filedialog, messagebox
 from analizador import analizador
+from Token import Token
 
 datos = ''
 
@@ -90,11 +91,11 @@ class app:
         self.guardarcomo.grid(row=0, column=2, padx=10, pady=10)
         self.guardarcomo['font'] = fuente
     #REPORTES TOKENS
-        self.tokens = tk.Button(self.menu_frame, text='Reporte Tokens', padx=20, height=1, bg="#fdf9c4", activebackground="#ffda9e")
+        self.tokens = tk.Button(self.menu_frame, text='Reporte Tokens', padx=20, height=1, bg="#fdf9c4", activebackground="#ffda9e", command=self.tokens)
         self.tokens.grid(row=1, column=0, padx=10, pady=10)
         self.tokens['font'] = fuente
     #REPORTES ERRORES
-        self.error = tk.Button(self.menu_frame, text='Reporte de Errores', padx=20, height=1, bg="#fdf9c4", activebackground="#ffda9e")
+        self.error = tk.Button(self.menu_frame, text='Reporte de Errores', padx=20, height=1, bg="#fdf9c4", activebackground="#ffda9e", command=self.errores)
         self.error.grid(row=1, column=1, padx=10, pady=10)
         self.error['font'] = fuente
     #EMPEZAR ANALIZADO DE AFD
@@ -142,10 +143,40 @@ class app:
     def analizado(self):
         editorTXT = self.txt
         if len(editorTXT) != 0:
+            tokens_lexemas, no_permitidos, textos = self.analizador.analize(editorTXT)
             self.analizador.analize(editorTXT)
             
+            # TOKENS LEXEMAS
+            with open('TokensLexemas.html', 'w') as file:
+                file.write('<html><head><style>')
+                file.write('table {  margin: 15px;  padding: 15px;}')
+                file.write('</style></head><body><h1>Tokens Lexemas</h1><table>')
+                file.write('<thead><tr><th>Token</th><th>Lexema</th><th>Linea</th><th>Columna</th></tr></thead><tbody>')
+                for tokens in tokens_lexemas:
+                    file.write(f'<tr><td>{Token.name}</td><td>{Token.value}</td><td>{Token.line}</td><td>{Token.column}</td></tr>')
+                    
+                file.write('</tbody></table></body></html>')
+            
+            # NO PERMITIDOS
+            with open('ListadoDeNoPermitidos.html', 'w') as file:
+                file.write('<html><head><style> tr {  margin: 15px;  padding: 15px;}')
+                file.write('table {  margin: 15px;  padding: 15px;}')
+                file.write('</style></head><body><h1>Caracteres no permitidos</h1><table>')
+                file.write('<thead><tr><th>Carácter</th><th>Linea</th><th>Columna</th></tr></thead><tbody>')
+                for np in no_permitidos:
+                    file.write(f'<tr><td>{np[0]}</td><td>{np[1]}</td><td>{np[2]}</td></tr>')
+                    
+                file.write('</tbody></table></body></html>')            
         else:
             messagebox.showinfo('Error!', 'La entrada no es valida')
+        
+    def tokens(self):
+        if os.name == 'nt':
+            os.system('start ' + 'TokensLexemas.html')
+        
+    def errores(self):
+        if os.name == 'nt':
+            os.system('start ' + 'ListadoDeNoPermitidos.html')
         
 raiz = tk.Tk()
 ventana = app(raiz)
