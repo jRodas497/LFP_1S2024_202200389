@@ -39,7 +39,7 @@ class app:
         #EDITOR
         self.editor = tk.Text(self.editor_frame, width="50", height="27", padx=35, pady=20, font=('Arial', 12), bg='lightgray')
         self.editor.grid(row=0, column=0, padx=10, pady=25)
-#        self.editor.bind('<<Modified>>', self.actualizar_variable)
+        self.editor.bind("<KeyRelease>", self.guardar_contenido)
         #SCROLL EDITOR
         self.scroll_editor = tk.Scrollbar(self.editor_frame, command=self.editor.yview)
         self.scroll_editor.grid(row=0, column=1, pady=25, sticky="nse")
@@ -105,6 +105,10 @@ class app:
         
         self.raiz.mainloop()
 
+    def guardar_contenido(self, event = None):
+        self.txt = self.editor.get("1.0", "end-1c")  # Obtener todo el texto del widget
+        print(self.txt)
+    
     def actualizar_variable(self, event=None):
         self.txt = self.editor.get("1.0", 'end-1c')
 
@@ -153,7 +157,7 @@ class app:
                 file.write('</style></head><body><h1>Tokens Lexemas</h1><table>')
                 file.write('<thead><tr><th>Token</th><th>Lexema</th><th>Linea</th><th>Columna</th></tr></thead><tbody>')
                 for tokens in tokens_lexemas:
-                    file.write(f'<tr><td>{Token.name}</td><td>{Token.value}</td><td>{Token.line}</td><td>{Token.column}</td></tr>')
+                    file.write(f'<tr><td>{tokens[0]}</td><td>{tokens[1]}</td><td>{tokens[2]}</td><td>{tokens[3]}</td></tr>')
                     
                 file.write('</tbody></table></body></html>')
             
