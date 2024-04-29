@@ -16,7 +16,9 @@ class analizador:
         
         tokensLexemas = []
         noPermitidos = []
+        tabla = []
         errores = []
+        self.expresiones = []
         textos = ''
         lexActual = ''
         estadoActual = estado0
@@ -92,9 +94,9 @@ class analizador:
                         if lexActual == 'ER':
                             tokensLexemas.append(('Palabra Reservada para ER', lexActual, self.linea, self.columna))
                             if char == ':':
-                                exR, bool = self.er(cadena[posActual +1:])
+                                self.exR, bool = self.er(cadena[posActual +1:])
                                 if bool:
-                                    tokensLexemas.append(('Expresión Regular', exR, self.linea, self.columna))
+                                    tokensLexemas.append(('Expresión Regular', self.exR, self.linea, self.columna))
                                     self.columna = 0
                                 else:
                                     errores.append(('ERROR! Se esperaba ";"', self.linea, self.columna + 4))
@@ -124,8 +126,20 @@ class analizador:
                             tokensLexemas.append(('Palabra Reservada para CADENAS', lexActual, self.linea, self.columna))
                             if char == ':':
                                 ret = self.chains(cadena[posActual +1:])
-                                CAD, pyc = ret
+                                CAD, pyc = ret    
+                                expresion = self.exR
                                 
+                                cadenas, error = self.separate_chains(CAD, expresion)
+                                #print(f'Cadenas encontradas: {cadenas}')
+                                for i in cadenas:
+                                    for j in cadenas:
+                                        if j == i:
+                                            print('Registro repetido')
+                                        else:
+                                            if error:
+                                                errores.append(('ERRROR! Sintaxis de cadenas mal realizada', self.linea, self.columna))
+                                            else:
+                                                tabla.append((i, self.exR))
                                 if pyc:
                                     tokensLexemas.append(('Conjunto de Cadenas a comprobar', CAD, self.linea, self.columna))
                                     self.columna = 0
@@ -161,7 +175,7 @@ class analizador:
                     lexActual += char
                     
             posActual += 1
-        return tokensLexemas, errores, textos
+        return tokensLexemas, errores, textos, tabla
     
     def armar_comentario(self, cadena):
         token = ''
@@ -211,6 +225,7 @@ class analizador:
     def chains(self, cadena):
         CAD = ''
         pyc = False
+        
         for char in cadena:
             if char == ';':
                 pyc = True
@@ -221,6 +236,32 @@ class analizador:
                 self.columna += 1
                 CAD += char
     
+    def separate_chains(self, cadena, expresion):
+        self.find = False
+        error = False
+        for e in self.expresiones:
+            if e == expresion:
+                self.find = True
+        
+        if not self.find:
+            self.expresiones.append((expresion))
+            
+            # Definir el patrón de búsqueda para encontrar las cadenas entre comillas
+            patron = r'"([^"]*)"'
+            # Buscar todas las coincidencias del patrón en la cadena
+            coincidencias = re.findall(patron, cadena)
+            
+            # Verificar si las cadenas están correctamente formadas
+            for coincidencia in coincidencias:
+                if coincidencia == '':
+                    error = True
+                    print("¡Error! Las comillas dobles faltan o están mal colocadas.")
+                                
+            # Formatear cada coincidencia con comillas dobles y separarlas por comas
+            registros = [ coincidencia for coincidencia in coincidencias ]
+            
+            return registros, error
+        
     def comentario_multilinea(self, cadena):
         print(cadena)
         token = ''

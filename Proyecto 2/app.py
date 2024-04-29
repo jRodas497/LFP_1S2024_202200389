@@ -46,30 +46,17 @@ class app:
         self.editor.config(yscrollcommand=self.scroll_editor.set) 
         #LISTADO
         self.tabla = ttk.Treeview(self.editor_frame, height='25')
-        self.tabla["columns"] = ("ID", "Expresión Regular", "Cadena", "Cumple")
+        self.tabla["columns"] = ("Expresión Regular", "Cadena", "Cumple")
         #HACER TABLA Y LIMPIARLA
         self.tabla.column("#0", width=0, stretch=tk.NO) 
-        self.tabla.column("ID", anchor=tk.W, width=100)
-        self.tabla.column("Expresión Regular", anchor=tk.W, width=300)
-        self.tabla.column("Cadena", anchor=tk.W, width=300)
+        self.tabla.column("Expresión Regular", anchor=tk.W, width=350)
+        self.tabla.column("Cadena", anchor=tk.W, width=350)
         self.tabla.column("Cumple", anchor=tk.W, width=150)
         #HEADERS DE TABLA
         self.tabla.heading('#0', text='', anchor=tk.W)
-        self.tabla.heading('ID', text='ID', anchor=tk.W)
         self.tabla.heading('Expresión Regular', text='Expresión Regular', anchor=tk.W)
         self.tabla.heading('Cadena', text='Cadena', anchor=tk.W)
         self.tabla.heading('Cumple', text='Cumple', anchor=tk.W)
-        #INSERTAR FILAS EN TABLA
-        self.tabla.insert('', 'end',text=1, values=('1','aaaaa', 'asdasda', 'si'))
-        self.tabla.insert('', 'end',text=2, values=('2','aaaaa', 'asdasda', 'si'))
-        self.tabla.insert('', 'end',text=3, values=('3','aaaaa', 'asdasda', 'si'))
-        self.tabla.insert('', 'end',text=4, values=('4','aaaaa', 'asdasda', 'si'))
-        #FORMATO TABLA
-        self.tabla.tag_configure("f1", background="lightgray")
-        
-        for i, fila in enumerate(self.tabla.get_children()):
-            if i % 2 == 0:
-                self.tabla.item(fila, tags=("f1",))
 
         self.tabla.grid(row=0, column=2, padx=10, pady=25)
         #SCROLL LISTADO
@@ -145,10 +132,24 @@ class app:
         self.variable_archivo.set(name)
         
     def analizado(self):
+        count = 0
         editorTXT = self.txt
         if len(editorTXT) != 0:
-            tokens_lexemas, no_permitidos, textos = self.analizador.analize(editorTXT)
+            tokens_lexemas, no_permitidos, textos, tabla = self.analizador.analize(editorTXT)
             self.analizador.analize(editorTXT)
+            
+            if tabla:
+                self.tabla.delete(*self.tabla.get_children())
+                for t in tabla:    
+                    count += 1
+                    if count % 2 == 0:
+                        self.tabla.insert('', 'end',text=count, values=(t[1], t[0], 'pendiente'))
+                    
+            self.tabla.tag_configure("f1", background="lightgray")
+        
+            for i, fila in enumerate(self.tabla.get_children()):
+                if i % 2 == 0:
+                    self.tabla.item(fila, tags=("f1",))
             
             # TOKENS LEXEMAS
             with open('TokensLexemas.html', 'w') as file:
