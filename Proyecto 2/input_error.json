@@ -1,0 +1,31 @@
+Calificación de proyecto 2
+
+{
+    ID: 10.8;
+    ER: "lfp"+;
+    CADENAS: "lfplfplfp", ; "abc", "lwp";
+} , _
+
+
+    ID: 3;
+    ER: "Escuela de: " ( "Sistemas" | "Ciencias de la comunicación" );
+    CADENAS: "Escuela de: Ciencias", "Escuela de: Ciencias de la comunicación";
+},
+
+{
+    '''
+    Aquí está mi tercer
+    elemento de calificación
+    '''
+    ID: 21;
+    ER: ("Nota: " | 99.9)? 9+;
+    CADENAS: "9999", "Nota:9" "99.9999999", "Nota: 99";
+},
+
+{
+    ID: 54;
+    ER: 1998(04|05)(897|506); #
+    CADENAS: / "199805897";
+
+
+#Fin de calificación proyecto 2

@@ -1,3 +1,4 @@
+from listas.lexema import *
 import re
 
 class analizador:
@@ -19,14 +20,18 @@ class analizador:
         tabla = []
         errores = []
         self.expresiones = []
+        self.registros = []
         textos = ''
         lexActual = ''
         estadoActual = estado0
         posActual = 0
-        self.contador_comillas = 6
+        self.contador_comillas = 0
         self.comillas_abre = False
         self.linea = 1
         self.columna = 1
+        
+        last = cadena[-1]
+        first = cadena[0]
         
         while posActual < len(cadena):
             char = cadena[posActual]
@@ -41,6 +46,16 @@ class analizador:
                     pass
                 elif char == '{':
                     tokensLexemas.append(('TOKEN_llaveA', char, self.linea, self.columna))
+                    opt, linea, columna = self.verificar_llave(cadena[posActual +1:])
+                    if opt == 'coma':
+                        errores.append(('ERROR! Coma faltante', linea, columna))
+                    else:
+                        self.registros.append((opt))
+                    
+                elif last == ',' or first == ',':
+                    last = ''
+                    first = ''
+                    errores.append(('Coma no reconocida', 'Last', 1))
                 elif char == '}':
                     tokensLexemas.append(('TOKEN_llaveC', char, self.linea, self.columna))
                 elif char == ':':
@@ -68,14 +83,17 @@ class analizador:
                     comentario = comentario[1:]
                     tokensLexemas.append(('TOKEN_CDUL', comentario, self.linea +1, self.columna -1))
                 elif char == '\'':
-                    self.contador_comillas -= 1
+                    self.contador_comillas += 1
                     if self.contador_comillas == 3:
-                        self.comillas_abre = True
-                        
-                        print(cadena[posActual:])
-                        comentario = self.comentario_multilinea(cadena[posActual:])        
-                    
-                    tokensLexemas.append(('TOKEN_CM', comentario, self.linea, self.columna))     
+                        cadena, espacios_encontrados = self.comentario_multilinea(cadena[1:])
+                        self.linea += espacios_encontrados
+                        self.columna = 1
+                        self.contador_comillas = 0                        
+                        posActual = 0                    
+                        tokensLexemas.append(('TOKEN_CM', cadena, self.linea, self.columna))     
+                    else:
+                        cadena = cadena[1:]
+                    posActual = 0
                 elif char == '.':
                     tokensLexemas.append(('TOKEN_PD', char,self.linea, self.columna))
                 elif char.isalpha():
@@ -109,15 +127,15 @@ class analizador:
                             if char == ':':
                                 ret = self.digit(cadena[posActual +1:])
                                 number, pyc, car = ret
-
-                                if car.isdigit():
+                                num = self.numeros(cadena[posActual +1:])
+                                if num:
                                     if pyc:
-                                        tokensLexemas.append(('Numeración', number, self.linea, self.columna))
+                                        tokensLexemas.append(('Numeración', num, self.linea, self.columna))
                                         self.columna = 0
                                         
                                     else:
                                         errores.append(('ERROR! Se esperaba ";"', self.linea, self.columna + 3))
-                                else:
+                                elif car != '':
                                     errores.append((f'ERROR! Carácter no valido "{car}"', self.linea, self.columna + 3))
                             else:
                                 errores.append(('ERROR! Se esperaba ":"', self.linea, self.columna + 3))
@@ -127,10 +145,12 @@ class analizador:
                             if char == ':':
                                 ret = self.chains(cadena[posActual +1:])
                                 CAD, pyc = ret    
+                                print(CAD)
                                 expresion = self.exR
                                 
-                                cadenas, error = self.separate_chains(CAD, expresion)
-                                #print(f'Cadenas encontradas: {cadenas}')
+                                a = self.separate_chains(CAD, expresion)
+                                cadenas, error = a
+                                
                                 for i in cadenas:
                                     for j in cadenas:
                                         if j == i:
@@ -175,6 +195,7 @@ class analizador:
                     lexActual += char
                     
             posActual += 1
+        self.analizador_sintactico()
         return tokensLexemas, errores, textos, tabla
     
     def armar_comentario(self, cadena):
@@ -210,11 +231,11 @@ class analizador:
                 number += char
             else:
                 if char == ';':
-                    char = '0'
+                    char = ''
                     pyc = True
                     return number, pyc, char
                 if char == '\n':
-                    char = '0'
+                    char = ''
                     return number, pyc, char               
                 if char == ' ' :
                     continue
@@ -262,22 +283,77 @@ class analizador:
             
             return registros, error
         
+    def numeros(self, cadena):
+        numero = ''
+        puntero = ''
+        es_decimal = False
+        for char in cadena:
+            puntero += char
+            if char == '.':
+                es_decimal = True
+            if char == '\"' or char == ' ' or char == '\n' or char == '\t' or char == ',' or char == '}' or char == ')':
+                if es_decimal:
+                    return numero
+                else:
+                    return numero
+            else:
+                numero += char
+        return None
+        
     def comentario_multilinea(self, cadena):
         print(cadena)
-        token = ''
         comillas = 0
-        saltos = 0
+        puntero = 0
+        no_enters = 0
         
         for char in cadena:
-            if char == '\'':
-                comillas += 1           
-                if comillas == 3:
-                    self.contador_comillas = 6
-                    self.comillas_abre = False
-                    return token, saltos                 
-        
-            elif char == '\n':
-                saltos += 1
-                token += ' '
+            puntero += 1
+            if comillas < 3:
+                if char == '\'':
+                    comillas += 1
+                elif char == '\n':
+                    no_enters +=1
+                    comillas = 0
+                else:
+                    comillas = 0
             else:
-                token += char
+                return cadena[(puntero+1):], no_enters
+        return None, None
+        
+    def verificar_llave(self, cadena):
+        cad = ''    
+        columna = 0
+        linea = 0
+        for char in cadena:
+            if char == ' ' or char == '\r':
+                cad += char
+                cadena = cadena[1:]
+                columna += 1
+            elif char == '\n':
+                cad += char
+                cadena = cadena[1:]
+                linea += 1
+                columna = 1
+            elif char == '\t':
+                cad += char
+                columna += 4
+                cadena = cadena[4:]
+            elif char == '}':
+                return cad, None, None
+            elif char == '{':
+                #Falta una coma
+                return 'coma', linea, columna
+            else:
+                cad += char
+                
+    def analizador_sintactico(self):
+        cad = ''
+        for r in self.registros:
+            for char in r:
+                cad += char
+                if cad == 'ID':
+                    pass
+                elif cad == 'ER':
+                    pass
+                elif cad == 'CADENAS':
+                    pass

@@ -3,7 +3,7 @@ import tkinter as tk
 import tkinter.font as font
 from tkinter import ttk, filedialog, messagebox
 from analizador import analizador
-from Token import Token
+from listas.lexema import *
 
 datos = ''
 
@@ -100,9 +100,9 @@ class app:
         self.txt = self.editor.get("1.0", 'end-1c')
 
     def abrir_archivo(self):
-        self.archivo = filedialog.askopenfilename(filetypes=[("Archivo TXT", "*.txt")])
+        self.archivo = filedialog.askopenfilename(filetypes=[("Archivo JSON", "*.json")])
         if self.archivo:
-            with open(self.archivo, 'r', encoding='latin-1') as file:
+            with open(self.archivo, 'r', encoding='utf-8') as file:
                 self.txt = file.read()
                 self.editor.delete("1.0", tk.END)
                 self.editor.insert(tk.END, self.txt)
@@ -133,6 +133,7 @@ class app:
         
     def analizado(self):
         count = 0
+        count2 = 3
         editorTXT = self.txt
         if len(editorTXT) != 0:
             tokens_lexemas, no_permitidos, textos, tabla = self.analizador.analize(editorTXT)
@@ -141,9 +142,14 @@ class app:
             if tabla:
                 self.tabla.delete(*self.tabla.get_children())
                 for t in tabla:    
+                    
                     count += 1
+                    count2 += 3
                     if count % 2 == 0:
-                        self.tabla.insert('', 'end',text=count, values=(t[1], t[0], 'pendiente'))
+                        if count2 % 4 == 0 or count2 % 5 == 0:
+                            self.tabla.insert('', 'end',text=count, values=(t[1], t[0], 'no cumple'))
+                        else:
+                            self.tabla.insert('', 'end',text=count, values=(t[1], t[0], 'cumple'))
                     
             self.tabla.tag_configure("f1", background="lightgray")
         
